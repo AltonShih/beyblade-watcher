@@ -1,0 +1,12 @@
+# 純靜態看板：直接發佈 repo 根目錄（index.html / icon-180.png / feed.json 都在這裡），
+# 不需要任何 build。GitHub Actions 每次更新 feed.json 推上來，Netlify 就會自動重新部署。
+[build]
+  publish = "."
+  command = ""
+
+# feed.json 由監看器頻繁更新，且看板已用 ?_=timestamp 破快取；
+# 這裡再保險地請瀏覽器/CDN 不要長期快取 feed.json，確保看到最新資料。
+[[headers]]
+  for = "/feed.json"
+  [headers.values]
+    Cache-Control = "no-cache"
