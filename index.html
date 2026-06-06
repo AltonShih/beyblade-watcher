@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Beyblade Watcher｜上架・補貨看板</title>
+<meta name="theme-color" content="#0a0d14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="陀螺看板">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0d14;
+    --bg2:#11161f;
+    --card:#161c27;
+    --card2:#1c2433;
+    --line:#27303f;
+    --txt:#e8edf4;
+    --muted:#8a98ad;
+    --orange:#ff5e2b;
+    --orange-d:#e0441a;
+    --cyan:#27e3d0;
+    --gold:#ffc24b;
+    --danger:#ff5470;
+    --green:#36d399;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--txt);
+    font-family:"Noto Sans TC",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(1100px 480px at 78% -8%, rgba(255,94,43,.16), transparent 60%),
+      radial-gradient(900px 460px at 10% 4%, rgba(39,227,208,.10), transparent 55%),
+      linear-gradient(180deg,var(--bg),var(--bg2));
+    background-attachment:fixed;
+  }
+  .wrap{max-width:880px;margin:0 auto;
+    padding:calc(26px + env(safe-area-inset-top,0px)) 18px calc(64px + env(safe-area-inset-bottom,0px))}
+
+  /* header */
+  header{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+  .bey{width:46px;height:46px;flex:none;position:relative;animation:spin 3.4s linear infinite}
+  .bey::before,.bey::after{content:"";position:absolute;inset:0;border-radius:50%}
+  .bey::before{background:conic-gradient(from 0deg,var(--orange),var(--gold),var(--cyan),var(--orange));
+    -webkit-mask:radial-gradient(transparent 38%,#000 40%);mask:radial-gradient(transparent 38%,#000 40%)}
+  .bey::after{inset:34%;background:var(--txt);box-shadow:0 0 12px rgba(255,194,75,.6)}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  h1{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:25px;letter-spacing:.5px;line-height:1}
+  h1 span{color:var(--orange)}
+  .sub{color:var(--muted);font-size:12.5px;margin-top:5px;letter-spacing:.3px}
+
+  .bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:18px 0 22px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:11px;
+    padding:9px 13px;font-size:12.5px;color:var(--muted);display:flex;gap:7px;align-items:center}
+  .stat b{color:var(--txt);font-family:"Chakra Petch",sans-serif;font-size:14px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+  .refresh{margin-left:auto;background:var(--card2);border:1px solid var(--line);color:var(--txt);
+    font:inherit;font-size:12.5px;padding:9px 14px;border-radius:11px;cursor:pointer;transition:.15s}
+  .refresh:hover{border-color:var(--orange);color:var(--orange)}
+
+  .preview-note{background:rgba(255,194,75,.10);border:1px solid rgba(255,194,75,.3);
+    color:var(--gold);border-radius:11px;padding:11px 14px;font-size:12.5px;margin-bottom:18px;display:none}
+
+  /* grid */
+  .grid{display:grid;grid-template-columns:1fr;gap:13px}
+  @media(min-width:620px){.grid{grid-template-columns:1fr 1fr}}
+
+  .card{position:relative;background:linear-gradient(150deg,var(--card),var(--card2));
+    border:1px solid var(--line);border-radius:15px;padding:17px 17px 15px 21px;overflow:hidden;
+    opacity:0;transform:translateY(10px);animation:rise .5s forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--line)}
+  .card.new::before{background:linear-gradient(var(--orange),var(--gold))}
+  .card.restock::before{background:linear-gradient(var(--cyan),var(--green))}
+  .card.soldout{opacity:.62}
+
+  .badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px;min-height:20px}
+  .badge{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:10.5px;letter-spacing:.6px;
+    padding:3px 9px;border-radius:999px;text-transform:uppercase}
+  .b-new{background:var(--orange);color:#1a0b06}
+  .b-restock{background:var(--cyan);color:#04201d}
+  .b-instock{background:rgba(54,211,153,.15);color:var(--green);border:1px solid rgba(54,211,153,.4)}
+  .b-out{background:rgba(255,84,112,.13);color:var(--danger);border:1px solid rgba(255,84,112,.4)}
+
+  .title{font-size:15px;font-weight:500;line-height:1.45;margin-bottom:12px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .foot{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .price{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:19px;color:var(--gold)}
+  .price small{font-size:11px;color:var(--muted);font-family:"Noto Sans TC"}
+  .price.na{font-size:13px;color:var(--muted);font-weight:500}
+  .buy{font-family:"Chakra Petch",sans-serif;font-weight:600;font-size:12.5px;letter-spacing:.4px;
+    text-decoration:none;color:#1a0b06;background:linear-gradient(135deg,var(--orange),var(--orange-d));
+    padding:9px 14px;border-radius:10px;white-space:nowrap;transition:.15s;
+    box-shadow:0 4px 14px rgba(255,94,43,.28)}
+  .buy:hover{transform:translateY(-1px);box-shadow:0 7px 20px rgba(255,94,43,.42)}
+
+  .empty{text-align:center;color:var(--muted);padding:50px 20px;font-size:14px}
+  footer{text-align:center;color:var(--muted);font-size:11.5px;margin-top:30px;opacity:.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="bey" aria-hidden="true"></div>
+    <div>
+      <h1>BEYBLADE <span>WATCHER</span></h1>
+      <div class="sub" id="source">上架・補貨即時看板</div>
+    </div>
+  </header>
+
+  <div class="bar">
+    <div class="stat"><span class="dot"></span> 共 <b id="count">–</b> 項</div>
+    <div class="stat">最後更新 <b id="updated">–</b></div>
+    <button class="refresh" id="refresh" onclick="load()">↻ 重新整理</button>
+  </div>
+
+  <div class="preview-note" id="preview">預覽模式:目前顯示的是範例資料(瀏覽器無法直接讀本機檔案)。掛上 GitHub Pages、或放在 feed.json 旁邊時,就會自動顯示真實資料。</div>
+
+  <div class="grid" id="grid"></div>
+
+  <footer>資料來源 feed.json・每 15 分鐘由 GitHub Actions 自動更新</footer>
+</div>
+
+<script>
+  // 預覽用範例資料(讀不到 feed.json 時顯示)
+  const SAMPLE = {
+    updated_at: new Date().toISOString(), source: "範例資料", count: 4,
+    products: [
+      {id:"1",title:"BX-45 戰鬥陀螺X 對戰組 Phoenix Wing 鳳凰翼",url:"#",price:1290,in_stock:true,status:"new"},
+      {id:"2",title:"BX-40 戰鬥陀螺X 強化發射器 連射型",url:"#",price:450,in_stock:true,status:"restock"},
+      {id:"3",title:"BX-35 戰鬥陀螺X 起始組 Dran Buster",url:"#",price:990,in_stock:true,status:"normal"},
+      {id:"4",title:"BX-23 戰鬥陀螺X APP 兌換預購限定品",url:"#",price:999999,in_stock:false,status:"normal"},
+    ]
+  };
+
+  function timeAgo(iso){
+    const d=new Date(iso), s=(Date.now()-d)/1000;
+    if(s<90) return "剛剛";
+    if(s<3600) return Math.round(s/60)+" 分鐘前";
+    if(s<86400) return Math.round(s/3600)+" 小時前";
+    return d.toLocaleDateString("zh-TW",{month:"numeric",day:"numeric"});
+  }
+  function priceHTML(p){
+    if(p==null||p>=999999) return '<span class="price na">未定價 / 預購</span>';
+    return '<span class="price"><small>NT$</small> '+Math.round(p).toLocaleString()+'</span>';
+  }
+
+  function render(data, isPreview){
+    document.getElementById("preview").style.display = isPreview ? "block" : "none";
+    document.getElementById("count").textContent = data.count ?? data.products.length;
+    document.getElementById("updated").textContent = data.updated_at ? timeAgo(data.updated_at) : "–";
+    document.getElementById("source").textContent = "來源:" + (data.source || "feed.json");
+
+    const grid=document.getElementById("grid");
+    if(!data.products || !data.products.length){
+      grid.innerHTML='<div class="empty">目前沒有商品資料。</div>'; return;
+    }
+    grid.innerHTML = data.products.map((p,i)=>{
+      const cls = p.status==="new"?"new" : p.status==="restock"?"restock" : "";
+      const badges = [];
+      if(p.status==="new") badges.push('<span class="badge b-new">★ 新上架</span>');
+      if(p.status==="restock") badges.push('<span class="badge b-restock">↻ 補貨</span>');
+      badges.push(p.in_stock
+        ? '<span class="badge b-instock">有貨</span>'
+        : '<span class="badge b-out">缺貨</span>');
+      const link = (p.url && p.url!=="#") ? p.url : null;
+      const buy = link
+        ? '<a class="buy" href="'+link+'" target="_blank" rel="noopener">前往購買 →</a>'
+        : '<span class="buy" style="opacity:.4;cursor:default;box-shadow:none">範例</span>';
+      return '<div class="card '+cls+(p.in_stock?"":" soldout")+'" style="animation-delay:'+(i*55)+'ms">'
+        + '<div class="badges">'+badges.join("")+'</div>'
+        + '<div class="title">'+(p.title||"未命名商品")+'</div>'
+        + '<div class="foot">'+priceHTML(p.price)+buy+'</div></div>';
+    }).join("");
+  }
+
+  async function load(){
+    const btn=document.getElementById("refresh"); btn.textContent="載入中…";
+    try{
+      const r = await fetch("feed.json?_="+Date.now());
+      if(!r.ok) throw new Error("no feed");
+      render(await r.json(), false);
+    }catch(e){
+      render(SAMPLE, true);   // 讀不到就顯示範例
+    }
+    btn.textContent="↻ 重新整理";
+  }
+  load();
+  setInterval(load, 5*60*1000);  // 每 5 分鐘自動更新一次
+</script>
+</body>
+</html>
