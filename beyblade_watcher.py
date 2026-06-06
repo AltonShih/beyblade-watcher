@@ -34,6 +34,8 @@ API_BASE = "https://shop.funbox.com.tw/category_products/takaratomy/beyblade.jso
 SHOP_BASE = "https://shop.funbox.com.tw"
 STATE_FILE = os.environ.get("STATE_FILE", "tracked_items.json")
 FEED_FILE = os.environ.get("FEED_FILE", "feed.json")  # 給 iOS app 讀的清單
+WATCHLIST_FILE = os.environ.get("WATCHLIST_FILE", "watchlist.json")  # 關注清單關鍵字
+HISTORY_FILE = os.environ.get("HISTORY_FILE", "history.jsonl")  # 歷史紀錄（append 累積）
 
 PAGE_LIMIT = 50          # 每頁筆數
 MAX_PAGES = 10           # 最多翻幾頁（防呆，避免無限迴圈）
@@ -216,6 +218,45 @@ def save_state_with_meta(products, meta):
     save_state(out)
 
 
+def load_watchlist():
+    """讀關注清單關鍵字。支援純陣列或 {"keywords":[...]}；讀不到就回空清單。"""
+    try:
+        with open(WATCHLIST_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return []
+    if isinstance(data, dict):
+        data = data.get("keywords", [])
+    if not isinstance(data, list):
+        return []
+    return [str(k).strip() for k in data if str(k).strip()]
+
+
+def matched_keyword(title, keywords):
+    """標題（不分大小寫）命中任一關鍵字就回傳該關鍵字，否則回 None。"""
+    t = (title or "").lower()
+    for kw in keywords:
+        if kw.lower() in t:
+            return kw
+    return None
+
+
+def append_history(current, ts):
+    """把這次每個商品的快照以 append 方式寫進 history.jsonl，長期累積不覆蓋。"""
+    lines = []
+    for p in current.values():
+        lines.append(json.dumps({
+            "ts": ts,
+            "id": p["key"],
+            "title": p["title"],
+            "price": p.get("price"),
+            "in_stock": p.get("in_stock", True),
+        }, ensure_ascii=False))
+    if lines:
+        with open(HISTORY_FILE, "a", encoding="utf-8") as f:
+            f.write("\n".join(lines) + "\n")
+
+
 def write_feed(current, new_keys=(), restock_keys=()):
     """產出給 iOS app 讀的清單。new/restock 為這次新增或補貨的商品。"""
     new_keys, restock_keys = set(new_keys), set(restock_keys)
@@ -333,6 +374,9 @@ def main():
 
     now = datetime.now(timezone.utc).isoformat()
 
+    # 每次跑完都記一筆歷史快照（含首次執行），之後用來畫價格走勢／搶手度
+    append_history(current, now)
+
     # 第一次執行：建立基準，不發通知，但仍輸出 feed 讓 app 有東西可顯示
     if not state:
         for p in current.values():
@@ -358,7 +402,7 @@ def main():
                     and p["price"] < old["price"]):
                 price_drops.append((p, old["price"]))
 
-    send_notifications(new_items, restocks, price_drops)
+    send_notifications(new_items, restocks, price_drops, load_watchlist())
 
     # 不在這次清單裡的舊商品保留原狀態（之後再出現可正確判斷補貨）
     merged = dict(state)
@@ -376,7 +420,32 @@ def main():
     print(f"完成：新上架 {len(new_items)}、補貨 {len(restocks)}、降價 {len(price_drops)}。")
 
 
-def send_notifications(new_items, restocks, price_drops):
+def send_starred(p, kind, kw):
+    """命中關注清單的商品：醒目高優先通知，與一般通知區隔。"""
+    price = f"NT${int(p['price'])}" if p["price"] else ""
+    stock = "（有貨）" if p["in_stock"] else "（目前缺貨）"
+    ntfy_publish(
+        f"🔔關注 {kind}：{p['title']}",
+        f"命中關鍵字「{kw}」\n{price} {stock}\n點我查看",
+        tags=["bell", "star"], priority=5, click=p["url"],
+    )
+
+
+def send_notifications(new_items, restocks, price_drops, keywords=()):
+    # 先挑出命中關注清單的新上架／補貨：這些一律單獨發醒目高優先通知
+    if keywords:
+        starred_restocks = [(p, matched_keyword(p["title"], keywords)) for p in restocks]
+        starred_news = [(p, matched_keyword(p["title"], keywords)) for p in new_items]
+        for p, kw in starred_restocks:
+            if kw:
+                send_starred(p, "補貨", kw)
+        for p, kw in starred_news:
+            if kw:
+                send_starred(p, "新上架", kw)
+        # 命中的已單獨通知，從一般清單移除，避免重複
+        restocks = [p for p, kw in starred_restocks if not kw]
+        new_items = [p for p, kw in starred_news if not kw]
+
     total = len(new_items) + len(restocks) + len(price_drops)
     if total == 0:
         return

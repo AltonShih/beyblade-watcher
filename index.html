@@ -144,6 +144,8 @@
   .b-soon{background:rgba(39,227,208,.15);color:var(--cyan);border:1px solid rgba(39,227,208,.4)}
   .b-fmt,.b-use{background:rgba(138,152,173,.14);color:var(--muted);border:1px solid var(--line)}
   .b-sys,.b-code{background:var(--gold);color:#241a04}
+  .b-star{background:linear-gradient(135deg,var(--gold),var(--orange));color:#241a04;
+    box-shadow:0 0 10px rgba(255,194,75,.35)}
   .t-atk{background:rgba(255,84,112,.16);color:var(--danger);border:1px solid rgba(255,84,112,.4)}
   .t-def{background:rgba(39,227,208,.15);color:var(--cyan);border:1px solid rgba(39,227,208,.4)}
   .t-sta{background:rgba(54,211,153,.15);color:var(--green);border:1px solid rgba(54,211,153,.4)}
@@ -302,6 +304,7 @@
     grid.innerHTML = data.products.map((p,i)=>{
       const cls = p.status==="new"?"new" : p.status==="restock"?"restock" : "";
       const badges = [];
+      if(isWatched(p.title)) badges.push('<span class="badge b-star">⭐ 關注</span>');
       if(p.status==="new") badges.push('<span class="badge b-new">★ 新上架</span>');
       if(p.status==="restock") badges.push('<span class="badge b-restock">↻ 補貨</span>');
       badges.push(p.in_stock
@@ -318,8 +321,26 @@
     }).join("");
   }
 
+  // 關注清單：標題命中任一關鍵字（不分大小寫）就在卡片標 ⭐
+  let WATCH = null;
+  async function loadWatch(){
+    if(WATCH !== null) return WATCH;
+    try{
+      const d = await (await fetch("watchlist.json?_="+Date.now())).json();
+      WATCH = (Array.isArray(d) ? d : (Array.isArray(d.keywords) ? d.keywords : []))
+        .map(k=>String(k).trim().toLowerCase()).filter(Boolean);
+    }catch(e){ WATCH = []; }
+    return WATCH;
+  }
+  function isWatched(title){
+    if(!WATCH || !WATCH.length || !title) return false;
+    const t = title.toLowerCase();
+    return WATCH.some(k=>t.includes(k));
+  }
+
   async function load(){
     const btn=document.getElementById("refresh"); btn.textContent="載入中…";
+    await loadWatch();
     try{
       const r = await fetch("feed.json?_="+Date.now());
       if(!r.ok) throw new Error("no feed");
