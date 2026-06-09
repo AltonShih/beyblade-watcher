@@ -100,6 +100,10 @@
     padding:9px 14px;border-radius:10px;white-space:nowrap;transition:.15s;
     box-shadow:0 4px 14px rgba(255,94,43,.28)}
   .buy:hover{transform:translateY(-1px);box-shadow:0 7px 20px rgba(255,94,43,.42)}
+  /* 資源連結卡片 */
+  .res-desc{font-size:12.5px;color:var(--txt);line-height:1.6;margin-bottom:12px}
+  .res-url{font-size:11.5px;color:var(--cyan);word-break:break-all;margin-bottom:14px;
+    font-family:"Chakra Petch",sans-serif}
 
   .empty{text-align:center;color:var(--muted);padding:50px 20px;font-size:14px}
   footer{text-align:center;color:var(--muted);font-size:11.5px;margin-top:30px;opacity:.7}
@@ -172,6 +176,21 @@
     border-radius:12px;padding:13px 15px;margin-bottom:10px}
   .lock-key{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:21px;color:var(--gold);text-align:center}
   .lock-desc{font-size:12.5px;color:var(--txt);line-height:1.6;white-space:pre-line}
+
+  /* 趨勢 */
+  .spark{width:100%;height:46px;display:block;margin:10px 0 4px}
+  .spark path{fill:none;stroke:var(--cyan);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .spark circle{fill:var(--gold)}
+  .chg{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:12.5px;padding:3px 9px;border-radius:999px}
+  .chg.up{background:rgba(255,84,112,.13);color:var(--danger);border:1px solid rgba(255,84,112,.4)}
+  .chg.down{background:rgba(54,211,153,.15);color:var(--green);border:1px solid rgba(54,211,153,.4)}
+  .chg.flat{background:rgba(138,152,173,.14);color:var(--muted);border:1px solid var(--line)}
+  .tr-range{font-size:11px;color:var(--muted);margin-top:2px}
+  .rank{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:20px;color:var(--gold);
+    flex:none;width:34px;text-align:center}
+  .hot-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+  .hot-out{color:var(--danger);font-weight:700}
+  .hot-back{color:var(--cyan);font-weight:700}
 </style>
 </head>
 <body>
@@ -189,6 +208,8 @@
     <button class="tab" data-tab="tips" onclick="showTab('tips')">技巧</button>
     <button class="tab" data-tab="events" onclick="showTab('events')">比賽</button>
     <button class="tab" data-tab="dex" onclick="showTab('dex')">圖鑑</button>
+    <button class="tab" data-tab="trend" onclick="showTab('trend')">趨勢</button>
+    <button class="tab" data-tab="links" onclick="showTab('links')">資源</button>
   </nav>
 
   <section class="panel active" id="panel-products">
@@ -261,6 +282,59 @@
       <div id="lock-blade"></div>
       <h3 class="lock-title gap">固鎖・高度</h3>
       <div id="lock-height"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-trend">
+    <nav class="subtabs">
+      <button class="subtab active" data-sub="price" onclick="showSub2('price')">價格走勢</button>
+      <button class="subtab" data-sub="hot" onclick="showSub2('hot')">搶手度</button>
+    </nav>
+
+    <div class="preview-note" id="trend-note" style="display:none"></div>
+
+    <div class="subpanel active" id="subp-price">
+      <div class="bar">
+        <div class="stat"><span class="dot"></span> <b id="tr-count">–</b> 項有價格紀錄</div>
+        <input class="filter" id="tr-search" type="search" placeholder="搜尋商品…" oninput="renderPriceTrend()">
+      </div>
+      <div class="grid" id="trend-grid"></div>
+    </div>
+
+    <div class="subpanel" id="subp-hot">
+      <div class="bar">
+        <div class="stat"><span class="dot"></span> 依庫存變動排名（缺貨×3 + 補貨×2）</div>
+      </div>
+      <div class="grid" id="hot-grid"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-links">
+    <div class="grid">
+      <div class="card" style="animation-delay:0ms">
+        <div class="title">BeyX 強度表</div>
+        <div class="res-desc">由 stan-yao 維護的陀螺強度評比 tier list</div>
+        <div class="res-url">stan-yao.github.io/beyblade_x_tier</div>
+        <div class="foot">
+          <a class="buy" href="https://stan-yao.github.io/beyblade_x_tier/" target="_blank" rel="noopener noreferrer">前往 ↗</a>
+        </div>
+      </div>
+      <div class="card" style="animation-delay:30ms">
+        <div class="title">BeyX 攻略站</div>
+        <div class="res-desc">beyblade.phstudy.org 攻略參考資料</div>
+        <div class="res-url">beyblade.phstudy.org</div>
+        <div class="foot">
+          <a class="buy" href="https://beyblade.phstudy.org/" target="_blank" rel="noopener noreferrer">前往 ↗</a>
+        </div>
+      </div>
+      <div class="card" style="animation-delay:60ms">
+        <div class="title">BeybladeHub</div>
+        <div class="res-desc">國際社群的陀螺資料庫、組合推薦、賽事資訊</div>
+        <div class="res-url">beybladehub.app</div>
+        <div class="foot">
+          <a class="buy" href="https://beybladehub.app/" target="_blank" rel="noopener noreferrer">前往 ↗</a>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -361,6 +435,7 @@
     document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.tab===name));
     if(name==="events") renderEvents();
     if(name==="dex") renderDex();
+    if(name==="trend") renderTrend();
   }
 
   /* ============ 比賽 ============ */
@@ -514,6 +589,132 @@
       (DEX["固鎖_刃"]||[]).map(x=>row(x)("刃","說明")).join("");
     document.getElementById("lock-height").innerHTML=
       (DEX["固鎖_高度"]||[]).map(x=>row(x)("高度","說明")).join("");
+  }
+
+  /* ============ 趨勢 ============ */
+  let HIST = null;   // 解析後依商品分組的歷史快照
+  function showSub2(name){
+    document.querySelectorAll("#panel-trend .subpanel").forEach(p=>p.classList.toggle("active", p.id==="subp-"+name));
+    document.querySelectorAll("#panel-trend .subtab").forEach(t=>t.classList.toggle("active", t.dataset.sub===name));
+  }
+
+  // 把 history.jsonl 解析成 { id: {title, snaps:[{ts,price,in_stock}, …(時間排序)] } }
+  function parseHistory(text){
+    const byId={};
+    text.split(/\r?\n/).forEach(line=>{
+      line=line.trim(); if(!line) return;
+      let r; try{ r=JSON.parse(line); }catch(e){ return; }
+      if(!r || r.id==null) return;
+      const g = byId[r.id] || (byId[r.id]={title:r.title||"", snaps:[]});
+      if(r.title) g.title=r.title;             // 以最後出現的標題為準
+      g.snaps.push({ts:r.ts, price:r.price, in_stock:r.in_stock!==false});
+    });
+    Object.values(byId).forEach(g=>g.snaps.sort((a,b)=>String(a.ts).localeCompare(String(b.ts))));
+    return byId;
+  }
+
+  async function renderTrend(){
+    const note=document.getElementById("trend-note");
+    if(HIST===null){
+      try{
+        const r=await fetch("history.jsonl?_="+Date.now());
+        if(!r.ok) throw new Error("no history");
+        HIST=parseHistory(await r.text());
+      }catch(e){
+        HIST={};
+        note.style.display="block";
+        note.textContent="尚無歷史資料:history.jsonl 會由 GitHub Actions 每 15 分鐘累積一次，需要幾次更新後才會出現價格走勢與搶手度。";
+      }
+    }
+    renderPriceTrend();
+    renderHot();
+  }
+
+  // 迷你折線圖：把一串價格畫成 SVG
+  function sparkline(prices){
+    if(prices.length<2) return "";
+    const W=260, H=46, pad=4;
+    const min=Math.min(...prices), max=Math.max(...prices), span=(max-min)||1;
+    const step=(W-pad*2)/(prices.length-1);
+    const pts=prices.map((p,i)=>{
+      const x=pad+i*step;
+      const y=pad+(H-pad*2)*(1-(p-min)/span);
+      return [x,y];
+    });
+    const d="M"+pts.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" L");
+    const last=pts[pts.length-1];
+    return '<svg class="spark" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'
+      + '<path d="'+d+'"/>'
+      + '<circle cx="'+last[0].toFixed(1)+'" cy="'+last[1].toFixed(1)+'" r="3"/></svg>';
+  }
+
+  function renderPriceTrend(){
+    const grid=document.getElementById("trend-grid");
+    const q=document.getElementById("tr-search").value.trim().toLowerCase();
+    // 只取有效價格（排除未定價 / 預購 999999 與 null）
+    const items=Object.entries(HIST||{}).map(([id,g])=>{
+      const prices=g.snaps.map(s=>s.price).filter(p=>p!=null && p<999999);
+      return {id, title:g.title, prices};
+    }).filter(it=>it.prices.length && (!q || it.title.toLowerCase().includes(q)))
+      .sort((a,b)=>a.title.localeCompare(b.title,"zh-Hant"));
+
+    document.getElementById("tr-count").textContent=items.length;
+    if(!items.length){
+      grid.innerHTML='<div class="empty">'+( (HIST&&Object.keys(HIST).length)?"沒有符合條件的商品。":"目前沒有價格紀錄。")+'</div>';
+      return;
+    }
+    grid.innerHTML=items.map((it,i)=>{
+      const first=it.prices[0], last=it.prices[it.prices.length-1];
+      const diff=last-first;
+      const pct=first?Math.round(diff/first*100):0;
+      const cls=diff>0?"up":diff<0?"down":"flat";
+      const arrow=diff>0?"▲":diff<0?"▼":"—";
+      const chg=it.prices.length<2
+        ? '<span class="chg flat">尚無變化</span>'
+        : '<span class="chg '+cls+'">'+arrow+' '+(diff>0?"+":"")+Math.round(diff).toLocaleString()
+            +(pct?(" ("+(pct>0?"+":"")+pct+"%)"):"")+'</span>';
+      const min=Math.min(...it.prices), max=Math.max(...it.prices);
+      return '<div class="card" style="animation-delay:'+(i*30)+'ms">'
+        + '<div class="badges"><span class="badge b-code">'+it.prices.length+' 筆</span>'+chg+'</div>'
+        + '<div class="title">'+esc(it.title||"未命名商品")+'</div>'
+        + sparkline(it.prices)
+        + '<div class="foot">'+priceHTML(last)
+          + '<div class="tr-range">區間 NT$'+Math.round(min).toLocaleString()+'–'+Math.round(max).toLocaleString()+'</div>'
+        + '</div></div>';
+    }).join("");
+  }
+
+  function renderHot(){
+    const grid=document.getElementById("hot-grid");
+    const items=Object.entries(HIST||{}).map(([id,g])=>{
+      let out=0, back=0;
+      for(let i=1;i<g.snaps.length;i++){
+        const prev=g.snaps[i-1].in_stock, cur=g.snaps[i].in_stock;
+        if(prev && !cur) out++;        // 有→無:缺貨
+        else if(!prev && cur) back++;  // 無→有:補貨
+      }
+      const cur=g.snaps.length?g.snaps[g.snaps.length-1].in_stock:true;
+      return {id, title:g.title, out, back, cur, score:out*3+back*2};
+    }).filter(it=>it.score>0)
+      .sort((a,b)=>b.score-a.score || b.out-a.out);
+
+    if(!items.length){
+      grid.innerHTML='<div class="empty">'+( (HIST&&Object.keys(HIST).length)?"還沒有觀察到庫存變動。":"目前沒有庫存紀錄。")+'</div>';
+      return;
+    }
+    grid.innerHTML=items.map((it,i)=>{
+      const stock=it.cur
+        ? '<span class="badge b-instock">有貨</span>'
+        : '<span class="badge b-out">缺貨</span>';
+      return '<div class="card" style="animation-delay:'+(i*30)+'ms">'
+        + '<div class="badges"><span class="badge b-star">🔥 '+it.score+'</span>'+stock+'</div>'
+        + '<div class="title" style="display:flex;gap:10px;align-items:flex-start">'
+          + '<span class="rank">#'+(i+1)+'</span>'
+          + '<span style="flex:1">'+esc(it.title||"未命名商品")+'</span></div>'
+        + '<div class="hot-row"><span class="hot-out">缺貨 '+it.out+' 次</span> · '
+          + '<span class="hot-back">補貨 '+it.back+' 次</span></div>'
+        + '</div>';
+    }).join("");
   }
 
   load();
