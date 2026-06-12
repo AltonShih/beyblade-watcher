@@ -404,10 +404,14 @@ def main():
 
     send_notifications(new_items, restocks, price_drops, load_watchlist())
 
-    # 不在這次清單裡的舊商品保留原狀態（之後再出現可正確判斷補貨）
-    merged = dict(state)
-    merged.update(current)
-    save_state_with_meta(merged, meta)
+    # 自動偵測下架：state 裡有、但這次 API 完全沒回傳的商品，判定為已下架。
+    # （state 已由 split_meta() 去除 META_KEY，所以不會誤判監看器自身狀態）
+    delisted = [old for key, old in state.items() if key not in current]
+    notify_delisted(delisted)
+
+    # 只保留這次 API 還看得到的商品（first_seen 已在上面從舊狀態帶過來）。
+    # 下架的商品會自動從狀態移除，之後若重新上架就能正確觸發「新上架」通知。
+    save_state_with_meta(current, meta)
 
     # 輸出給 app 的清單，標記這次的新上架與補貨
     write_feed(
@@ -416,8 +420,8 @@ def main():
         restock_keys=[p["key"] for p in restocks],
     )
 
-    total = len(new_items) + len(restocks) + len(price_drops)
-    print(f"完成：新上架 {len(new_items)}、補貨 {len(restocks)}、降價 {len(price_drops)}。")
+    print(f"完成：新上架 {len(new_items)}、補貨 {len(restocks)}、"
+          f"降價 {len(price_drops)}、下架 {len(delisted)}。")
 
 
 def send_starred(p, kind, kw):
@@ -429,6 +433,19 @@ def send_starred(p, kind, kw):
         f"命中關鍵字「{kw}」\n{price} {stock}\n點我查看",
         tags=["bell", "star"], priority=5, click=p["url"],
     )
+
+
+def notify_delisted(delisted):
+    """已下架商品：低優先（priority 2）逐項通知。獨立於洗版摘要邏輯之外，
+    因為下架屬於低優先資訊，不該被大量新上架/補貨壓掉。"""
+    for p in delisted:
+        title = p.get("title", p.get("key", "（未知商品）"))
+        url = p.get("url")
+        ntfy_publish(
+            "🔻已下架",
+            f"{title}\n已從 Funbox 清單消失。",
+            tags=["arrow_down"], priority=2, click=url,
+        )
 
 
 def send_notifications(new_items, restocks, price_drops, keywords=()):
