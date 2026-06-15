@@ -103,6 +103,11 @@
     padding:9px 14px;border-radius:10px;white-space:nowrap;transition:.15s;
     box-shadow:0 4px 14px rgba(255,94,43,.28)}
   .buy:hover{transform:translateY(-1px);box-shadow:0 7px 20px rgba(255,94,43,.42)}
+  /* 建議售價對照(商品卡片) */
+  .pnote{font-size:11.5px;font-weight:600;display:flex;align-items:center;gap:5px;margin-bottom:12px}
+  .pnote.over{color:var(--orange)}
+  .pnote.over span{opacity:.8;font-weight:500}
+  .pnote.ok{color:var(--muted)}
   /* 資源連結卡片 */
   .res-desc{font-size:12.5px;color:var(--txt);line-height:1.6;margin-bottom:12px}
   .res-url{font-size:11.5px;color:var(--cyan);word-break:break-all;margin-bottom:14px;
@@ -167,6 +172,24 @@
   .subpanel{display:none}
   .subpanel.active{display:block}
   .bey-name{font-size:14.5px;font-weight:500;line-height:1.45;margin-bottom:4px}
+
+  /* 商品型號:系列切換 tab */
+  .modeltabs{display:flex;gap:7px;margin:18px 0 4px;flex-wrap:wrap}
+  .modeltab{font-family:"Noto Sans TC";font-size:12.5px;font-weight:600;background:transparent;
+    border:1px solid var(--line);color:var(--muted);padding:7px 16px;border-radius:999px;cursor:pointer;transition:.15s}
+  .modeltab:hover{color:var(--txt)}
+  .modeltab.active{background:var(--card2);color:var(--cyan);border-color:var(--cyan)}
+  .b-price{background:rgba(255,194,75,.15);color:var(--gold);border:1px solid rgba(255,194,75,.4)}
+  /* 變體展開 */
+  .var{margin-top:10px;border-top:1px solid var(--line);padding-top:9px}
+  .var summary{cursor:pointer;font-size:12px;color:var(--cyan);font-weight:600;list-style:none;
+    display:flex;align-items:center;gap:5px}
+  .var summary::-webkit-details-marker{display:none}
+  .var[open] summary{margin-bottom:6px}
+  .var-item{padding:7px 0;border-top:1px dashed var(--line);line-height:1.5}
+  .var-item:first-of-type{border-top:none}
+  .var-name{font-size:12.5px;font-weight:500;color:var(--txt);margin-bottom:2px}
+  .var-meta{font-size:11px;color:var(--muted)}
   .ax-note{font-size:12px;color:var(--muted);line-height:1.6;white-space:pre-line;margin-top:auto;
     border-top:1px solid var(--line);padding-top:10px}
 
@@ -351,6 +374,7 @@
       <button class="subtab active" data-sub="beys" onclick="showSub('beys')">陀螺圖鑑</button>
       <button class="subtab" data-sub="axes" onclick="showSub('axes')">軸心</button>
       <button class="subtab" data-sub="locks" onclick="showSub('locks')">固鎖</button>
+      <button class="subtab" data-sub="models" onclick="showSub('models')">商品型號</button>
     </nav>
 
     <div class="subpanel active" id="sub-beys">
@@ -373,6 +397,15 @@
       <div id="lock-blade"></div>
       <h3 class="lock-title gap">固鎖・高度</h3>
       <div id="lock-height"></div>
+    </div>
+
+    <div class="subpanel" id="sub-models">
+      <nav class="modeltabs" id="model-tabs"></nav>
+      <div class="bar">
+        <div class="stat"><span class="dot"></span> <b id="model-count">–</b> 款</div>
+        <input class="filter" id="model-search" type="search" placeholder="搜尋型號 / 名稱…" oninput="renderModels()">
+      </div>
+      <div class="grid" id="model-grid"></div>
     </div>
   </section>
 
@@ -482,6 +515,7 @@
       return '<div class="card '+cls+(p.in_stock?"":" soldout")+'" style="animation-delay:'+(i*55)+'ms">'
         + '<div class="badges">'+badges.join("")+'</div>'
         + '<div class="title">'+(p.title||"未命名商品")+'</div>'
+        + priceNoteHTML(p.title, p.price)
         + '<div class="foot">'+priceHTML(p.price)+buy+'</div></div>';
     }).join("");
   }
@@ -503,9 +537,48 @@
     return WATCH.some(k=>t.includes(k));
   }
 
+  // 官方建議售價：型號 → {sug, raw} 對照表(供商品卡片比價與圖鑑共用)
+  let PRICES = null, PRICEMAP = null;
+  function parseSuggested(v){          // 取字串中第一個數字;無數字(如「尚未公布」)回傳 null
+    if(v==null) return null;
+    const m=String(v).replace(/,/g,"").match(/\d+/);
+    return m ? parseInt(m[0],10) : null;
+  }
+  async function loadPrices(){
+    if(PRICES!==null) return PRICES;
+    try{
+      const r=await fetch("official_prices.json?_="+Date.now());
+      if(!r.ok) throw new Error("no prices");
+      PRICES=await r.json();
+    }catch(e){ PRICES={products:[]}; }
+    PRICEMAP={};
+    (PRICES.products||[]).forEach(p=>{
+      const code=String(p["型號"]||"").toUpperCase().trim();
+      const sug=parseSuggested(p["建議售價"]);
+      if(code && sug!=null && !(code in PRICEMAP)) PRICEMAP[code]={sug, raw:p["建議售價"]};
+    });
+    return PRICES;
+  }
+  // 依標題型號(如 BX-23、CX-15、BXG-17)比對建議售價,回傳對照標籤 HTML
+  function priceNoteHTML(title, price){
+    if(!PRICEMAP || price==null || price>=999999) return "";
+    const toks=String(title||"").toUpperCase().match(/[A-Z]{2,3}-\d+/g);
+    if(!toks) return "";
+    let hit=null;
+    for(const t of toks){ if(PRICEMAP[t]){ hit=PRICEMAP[t]; break; } }
+    if(!hit) return "";
+    if(price>hit.sug){
+      const diff=Math.round(price-hit.sug);
+      return '<div class="pnote over">⚠ 高於建議售價 $'+hit.sug.toLocaleString()
+        +' <span>(+$'+diff.toLocaleString()+')</span></div>';
+    }
+    return '<div class="pnote ok">✓ 符合建議售價 $'+hit.sug.toLocaleString()+'</div>';
+  }
+
   async function load(){
     const btn=document.getElementById("refresh"); btn.textContent="載入中…";
     await loadWatch();
+    await loadPrices();
     try{
       const r = await fetch("https://raw.githubusercontent.com/AltonShih/beyblade-watcher/main/feed.json?_="+Date.now());
       if(!r.ok) throw new Error("no feed");
@@ -727,6 +800,10 @@
     document.querySelectorAll("#panel-dex .subtab").forEach(t=>t.classList.toggle("active", t.dataset.sub===name));
   }
   async function renderDex(){
+    // 商品型號子分頁(獨立資料來源,只初始化一次)
+    await loadPrices();
+    if(!MODEL_BUILT && PRICES){ buildModelTabs(); renderModels(); MODEL_BUILT=true; }
+
     if(DEX) return;
     try{
       const r=await fetch("parts.json?_="+Date.now());
@@ -740,6 +817,68 @@
     buildAxisFilters();
     renderAxes();
     renderLocks();
+  }
+
+  /* ---- 商品型號 ---- */
+  let MODEL_BUILT=false, MODEL_ACTIVE=null, MODEL_SERIES=[];
+  function seriesLabel(s){ return String(s||"").split("系列")[0].trim() || String(s||""); }
+  function buildModelTabs(){
+    MODEL_SERIES=[...new Set((PRICES.products||[]).map(p=>p["系列"]).filter(Boolean))];
+    MODEL_ACTIVE=MODEL_SERIES[0]||null;
+    document.getElementById("model-tabs").innerHTML=MODEL_SERIES.map((s,i)=>
+      '<button class="modeltab'+(i===0?' active':'')+'" data-ser="'+esc(s)+'" '
+      +'onclick="showModelSer(this.dataset.ser)">'+esc(seriesLabel(s))+'</button>').join("");
+  }
+  function showModelSer(s){
+    MODEL_ACTIVE=s;
+    document.getElementById("model-search").value="";   // 切系列時清除搜尋
+    document.querySelectorAll("#model-tabs .modeltab").forEach(b=>b.classList.toggle("active", b.dataset.ser===s));
+    renderModels();
+  }
+  function renderModels(){
+    if(!PRICES) return;
+    const q=document.getElementById("model-search").value.trim().toLowerCase();
+    let list=PRICES.products||[];
+    if(q){   // 有搜尋:跨系列比對型號 / 名稱 / 變體名稱
+      list=list.filter(p=>{
+        const hay=[p["型號"],p["名稱"]].concat((p["變體"]||[]).map(v=>v["名稱"])).join(" ").toLowerCase();
+        return hay.includes(q);
+      });
+    }else{
+      list=list.filter(p=>p["系列"]===MODEL_ACTIVE);
+    }
+    document.getElementById("model-count").textContent=list.length;
+    const grid=document.getElementById("model-grid");
+    if(!list.length){
+      grid.innerHTML='<div class="empty">'+(q?"沒有符合的商品型號。":"沒有資料。")+'</div>'; return;
+    }
+    grid.innerHTML=list.map((p,i)=>modelCard(p,i,!!q)).join("");
+  }
+  function modelCard(p,i,showSeries){
+    const meta=[];
+    const add=(label,val)=>{ if(val) meta.push('<div><dt>'+label+'</dt><dd>'+esc(val)+'</dd></div>'); };
+    add("固鎖",p["固鎖"]); add("軸心",p["軸心"]); add("紋章",p["紋章"]); add("戰刃組成",p["戰刃組成"]);
+    const ser = showSeries ? '<span class="badge b-use">'+esc(seriesLabel(p["系列"]))+'</span>' : "";
+    return '<div class="card" style="animation-delay:'+(i*18)+'ms">'
+      + '<div class="badges"><span class="badge b-sys">'+esc(p["型號"]||"?")+'</span>'
+        + '<span class="badge b-price">'+esc(p["建議售價"]||"-")+'</span>'+ser+'</div>'
+      + '<div class="bey-name">'+esc(p["名稱"]||"未命名")+'</div>'
+      + (meta.length?'<dl class="meta">'+meta.join("")+'</dl>':"")
+      + variantsHTML(p["變體"]||[])
+      + '</div>';
+  }
+  function variantsHTML(vars){
+    if(!vars.length) return "";
+    const items=vars.map(v=>{
+      const bits=[];
+      if(v["固鎖"]) bits.push("固鎖 "+esc(v["固鎖"]));
+      if(v["軸心"]) bits.push("軸心 "+esc(v["軸心"]));
+      if(v["紋章"]) bits.push("紋章 "+esc(v["紋章"]));
+      if(v["戰刃組成"]) bits.push("戰刃 "+esc(v["戰刃組成"]));
+      return '<div class="var-item"><div class="var-name">'+esc(v["名稱"]||"")+'</div>'
+        + (bits.length?'<div class="var-meta">'+bits.join(" · ")+'</div>':"")+'</div>';
+    }).join("");
+    return '<details class="var"><summary>變體 '+vars.length+' 款 ▾</summary>'+items+'</details>';
   }
 
   function renderBeys(){
