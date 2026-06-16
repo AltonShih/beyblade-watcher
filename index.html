@@ -163,6 +163,69 @@
   .t-sta{background:rgba(54,211,153,.15);color:var(--green);border:1px solid rgba(54,211,153,.4)}
   .t-bal{background:rgba(255,194,75,.15);color:var(--gold);border:1px solid rgba(255,194,75,.4)}
 
+  /* 官方規則 */
+  .rules-top{margin:8px 0 18px}
+  .rules-title{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .rules-title h2{font-family:"Chakra Petch","Noto Sans TC",sans-serif;font-size:20px;font-weight:700;
+    color:var(--txt);letter-spacing:.5px}
+  .rules-title .ver{font-family:"Chakra Petch",sans-serif;font-weight:700;font-size:13px;
+    color:var(--gold);border:1px solid rgba(255,194,75,.4);background:rgba(255,194,75,.1);
+    padding:3px 12px;border-radius:999px;letter-spacing:.4px;white-space:nowrap}
+  .rules-search{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .rules-search input{flex:1;min-width:220px;font-family:"Noto Sans TC";font-size:14px;
+    background:var(--card2);border:1px solid var(--line);color:var(--txt);border-radius:10px;
+    padding:10px 14px;outline:none;transition:.15s}
+  .rules-search input:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,94,43,.15)}
+  .rules-hits{font-size:12.5px;color:var(--muted);white-space:nowrap}
+
+  .rules-layout{display:grid;grid-template-columns:210px 1fr;gap:24px;align-items:start}
+  .rules-nav{position:sticky;top:14px;max-height:calc(100vh - 40px);overflow:auto}
+  .rules-nav-select{display:none;width:100%;font-family:"Noto Sans TC";font-size:14px;
+    background:var(--card2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:10px 12px}
+  .rules-nav ul{list-style:none}
+  .rules-nav li a{display:block;font-size:12.5px;line-height:1.4;color:var(--muted);text-decoration:none;
+    padding:7px 10px;border-radius:8px;border-left:2px solid transparent;cursor:pointer;transition:.12s}
+  .rules-nav li a:hover{color:var(--txt);background:var(--card)}
+  .rules-nav li a.active{color:var(--orange);border-left-color:var(--orange);background:rgba(255,94,43,.08)}
+  .rules-nav li a.nav-hit{color:var(--gold)}
+  .rules-nav li.lv-group a{font-weight:700;color:var(--txt);margin-top:6px}
+
+  .rule-sec{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:18px 20px;margin-bottom:14px;scroll-margin-top:14px}
+  .rule-sec.group{background:transparent;border:none;border-left:3px solid var(--orange);
+    border-radius:0;padding:4px 0 4px 14px;margin:26px 0 12px}
+  .rule-sec h3{font-family:"Chakra Petch","Noto Sans TC",sans-serif;font-size:16px;font-weight:700;
+    color:var(--orange);margin-bottom:12px;letter-spacing:.3px}
+  .rule-sec.group h3{color:var(--txt);font-size:18px;margin:0}
+  .rule-sec p{font-size:14px;line-height:1.85;color:var(--txt);margin:0 0 10px;padding-left:16px;
+    position:relative;text-align:justify}
+  .rule-sec p:last-child{margin-bottom:0}
+  .rule-sec p::before{content:"";position:absolute;left:3px;top:11px;width:5px;height:5px;
+    border-radius:50%;background:var(--cyan)}
+  .rule-sec p .sub{display:block;margin-top:5px;color:var(--muted);font-size:13px;line-height:1.7}
+
+  /* 長文字表格卡片(保留原始斷行) */
+  .rule-table{background:var(--card2);border:1px solid var(--line);border-left:3px solid var(--cyan);
+    border-radius:12px;padding:16px 18px;margin:0 0 14px}
+  .rule-table .rt-title{font-family:"Chakra Petch","Noto Sans TC",sans-serif;font-size:14px;font-weight:700;
+    color:var(--cyan);margin-bottom:8px;letter-spacing:.3px}
+  .rule-table pre{font-family:"Noto Sans TC",sans-serif;font-size:13.5px;line-height:1.9;color:var(--txt);
+    white-space:pre-wrap;word-break:break-word;margin:0}
+  .rule-diff{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 0 14px}
+  .rule-diff .rule-table{margin:0}
+  .rule-diff .before{border-left-color:var(--muted)}
+  .rule-diff .before .rt-title{color:var(--muted)}
+  .rule-diff .after{border-left-color:var(--green)}
+  .rule-diff .after .rt-title{color:var(--green)}
+  .rules-content mark{background:var(--gold);color:#1a0b06;border-radius:3px;padding:0 1px}
+  @media(max-width:760px){
+    .rules-layout{grid-template-columns:1fr;gap:14px}
+    .rules-nav{position:static;max-height:none}
+    .rules-nav-select{display:block}
+    .rules-nav ul{display:none}
+    .rule-diff{grid-template-columns:1fr}
+  }
+
   /* 圖鑑 sub-tabs */
   .subtabs{display:flex;gap:7px;margin:18px 0 4px;flex-wrap:wrap}
   .subtab{font-family:"Noto Sans TC";font-size:12.5px;font-weight:600;background:transparent;
@@ -311,6 +374,7 @@
   <nav class="tabs">
     <button class="tab active" data-tab="products" onclick="showTab('products')">商品</button>
     <button class="tab" data-tab="tips" onclick="showTab('tips')">技巧</button>
+    <button class="tab" data-tab="rules" onclick="showTab('rules')">規則</button>
     <button class="tab" data-tab="events" onclick="showTab('events')">比賽</button>
     <button class="tab" data-tab="dex" onclick="showTab('dex')">圖鑑</button>
     <button class="tab" data-tab="trend" onclick="showTab('trend')">趨勢</button>
@@ -349,6 +413,27 @@
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowfullscreen></iframe>
       </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-rules">
+    <div class="rules-top">
+      <div class="rules-title">
+        <h2>戰鬥陀螺X 官方規則</h2>
+        <span class="ver" id="rules-ver"></span>
+      </div>
+      <div class="rules-search">
+        <input id="rules-q" type="search" placeholder="搜尋規則關鍵字…(例:殿堂、爆裂、發射器)"
+          oninput="onRulesSearch(this.value)" autocomplete="off">
+        <span class="rules-hits" id="rules-hits"></span>
+      </div>
+    </div>
+    <div class="rules-layout">
+      <nav class="rules-nav" id="rules-nav">
+        <select class="rules-nav-select" id="rules-nav-select" onchange="gotoRule(this.value)"></select>
+        <ul id="rules-nav-list"></ul>
+      </nav>
+      <div class="rules-content" id="rules-content"><div class="empty">載入中…</div></div>
     </div>
   </section>
 
@@ -600,6 +685,165 @@
     if(name==="events") renderEvents();
     if(name==="dex") renderDex();
     if(name==="trend") renderTrend();
+    if(name==="rules") renderRules();
+  }
+
+  /* ============ 官方規則 ============ */
+  let RULES = null;
+  async function renderRules(){
+    if(RULES) return;            // 已渲染
+    const content=document.getElementById("rules-content");
+    try{
+      const r=await fetch("rules.json?_="+Date.now());
+      if(!r.ok) throw new Error("no rules");
+      RULES=await r.json();
+    }catch(e){ content.innerHTML='<div class="empty">讀不到 rules.json。</div>'; return; }
+
+    // 版本徽章
+    const v=document.getElementById("rules-ver");
+    v.textContent=[RULES.version, RULES.date && ("("+RULES.date+")")].filter(Boolean).join(" ");
+
+    const sections=RULES.sections||[];
+    const tables=RULES.tables||[];
+
+    // ── tables 歸位:依「首行 ↔ 章節標題」關鍵字比對 ──
+    const tableFor={};          // sectionIndex -> [tableStr,...]
+    const leftover=[];          // 比對不到的表格
+    tables.forEach(t=>{
+      const str=String(t);
+      const first=str.split("\n").map(s=>s.trim()).find(Boolean)||"";
+      // 「改定前/改定後」僅為欄位標籤,實際對照內容在「關於準備」章節,故略過
+      if(first==="改定前"||first==="改定後") return;
+      let idx=-1;
+      sections.forEach((s,i)=>{
+        const h=(s.heading||"").trim();
+        if(h.length>=4 && (first.includes(h)||h.includes(first))) idx=i;
+      });
+      if(idx>=0) (tableFor[idx]=tableFor[idx]||[]).push(str);
+      else leftover.push(str);
+    });
+
+    const tableCard=(str,cls,title)=>
+      `<div class="rule-table ${cls||""}">`+
+      (title?`<div class="rt-title">${esc(title)}</div>`:"")+
+      `<pre>${esc(str)}</pre></div>`;
+
+    // ── 章節導覽 + 內容 ──
+    const navItems=[];
+    const html=sections.map((s,i)=>{
+      const body=s.body||[];
+      const id="rule-"+i;
+      const isGroup=!body.length;
+      navItems.push(`<li class="${isGroup?"lv-group":""}"><a data-target="${id}" onclick="gotoRule('${id}')">${esc(s.heading)}</a></li>`);
+      let out;
+      if(isGroup){
+        out=`<div class="rule-sec group" id="${id}"><h3>${esc(s.heading)}</h3></div>`;
+      }else if(s.heading==="關於準備" && body.length===2){
+        // 改定前/改定後 對照
+        out=`<div class="rule-sec" id="${id}"><h3>${esc(s.heading)}</h3>`+
+          `<div class="rule-diff">`+
+          tableCard(String(body[0]),"before","改定前")+
+          tableCard(String(body[1]),"after","改定後")+
+          `</div></div>`;
+      }else{
+        const paras=body.map(line=>{
+          const [main,...subs]=String(line).split("\n");
+          const subHtml=subs.map(t=>`<span class="sub">${esc(t)}</span>`).join("");
+          return `<p>${esc(main)}${subHtml}</p>`;
+        }).join("");
+        out=`<div class="rule-sec" id="${id}"><h3>${esc(s.heading)}</h3>${paras}</div>`;
+      }
+      // 該章節對應的表格
+      const t=tableFor[i];
+      if(t) out+=t.map(str=>tableCard(str,null,str.split("\n").map(x=>x.trim()).find(Boolean))).join("");
+      return out;
+    });
+
+    // 比對不到的表格 → 結尾「比賽勝負細則」
+    if(leftover.length){
+      navItems.push(`<li class="lv-group"><a data-target="rule-extra" onclick="gotoRule('rule-extra')">比賽勝負細則</a></li>`);
+      html.push(`<div class="rule-sec group" id="rule-extra"><h3>比賽勝負細則</h3></div>`);
+      leftover.forEach(str=>html.push(tableCard(str,null,str.split("\n").map(x=>x.trim()).find(Boolean))));
+    }
+
+    document.getElementById("rules-content").innerHTML=html.join("");
+    document.getElementById("rules-nav-list").innerHTML=navItems.join("");
+    const sel=document.getElementById("rules-nav-select");
+    sel.innerHTML='<option value="">跳至章節…</option>'+
+      navItems.map(li=>{
+        const m=li.match(/data-target="([^"]+)"[^>]*>([^<]+)</);
+        return m?`<option value="${m[1]}">${m[2]}</option>`:"";
+      }).join("");
+
+    setupRulesScrollSpy();
+  }
+
+  function gotoRule(id){
+    if(!id) return;
+    const el=document.getElementById(id);
+    if(el) el.scrollIntoView({behavior:"smooth",block:"start"});
+  }
+
+  let rulesSpyBound=false;
+  function setupRulesScrollSpy(){
+    if(rulesSpyBound) return; rulesSpyBound=true;
+    const links=()=>Array.from(document.querySelectorAll("#rules-nav-list a"));
+    const obs=new IntersectionObserver(entries=>{
+      entries.forEach(en=>{
+        if(en.isIntersecting){
+          const id=en.target.id;
+          links().forEach(a=>a.classList.toggle("active", a.dataset.target===id));
+        }
+      });
+    },{rootMargin:"-10% 0px -80% 0px",threshold:0});
+    document.querySelectorAll("#rules-content .rule-sec").forEach(el=>obs.observe(el));
+  }
+
+  /* 關鍵字搜尋:高亮命中 + 定位第一個 */
+  let rulesQTimer=null;
+  function onRulesSearch(q){
+    clearTimeout(rulesQTimer);
+    rulesQTimer=setTimeout(()=>doRulesSearch(q.trim()),120);
+  }
+  function doRulesSearch(q){
+    const content=document.getElementById("rules-content");
+    const hitsEl=document.getElementById("rules-hits");
+    // 清除舊高亮
+    content.querySelectorAll("mark").forEach(m=>{
+      const t=document.createTextNode(m.textContent); m.replaceWith(t);
+    });
+    content.querySelectorAll(".rule-sec, .rule-table").forEach(n=>n.normalize());
+    document.querySelectorAll("#rules-nav-list a").forEach(a=>a.classList.remove("nav-hit"));
+    if(!q){ hitsEl.textContent=""; return; }
+
+    const needle=q.toLowerCase();
+    let count=0, first=null;
+    const walker=document.createTreeWalker(content, NodeFilter.SHOW_TEXT, {
+      acceptNode:n=> n.nodeValue && n.nodeValue.toLowerCase().includes(needle) && n.parentElement.tagName!=="MARK"
+        ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT
+    });
+    const targets=[];
+    let node; while(node=walker.nextNode()) targets.push(node);
+    targets.forEach(textNode=>{
+      const text=textNode.nodeValue, low=text.toLowerCase(), frag=document.createDocumentFragment();
+      let i=0, idx;
+      while((idx=low.indexOf(needle,i))>=0){
+        if(idx>i) frag.appendChild(document.createTextNode(text.slice(i,idx)));
+        const mark=document.createElement("mark"); mark.textContent=text.slice(idx,idx+needle.length);
+        frag.appendChild(mark); if(!first) first=mark; count++; i=idx+needle.length;
+      }
+      if(i<text.length) frag.appendChild(document.createTextNode(text.slice(i)));
+      textNode.parentNode.replaceChild(frag,textNode);
+    });
+    // 導覽列標記命中章節
+    document.querySelectorAll("#rules-content .rule-sec").forEach(sec=>{
+      if(sec.querySelector("mark")){
+        const a=document.querySelector(`#rules-nav-list a[data-target="${sec.id}"]`);
+        if(a) a.classList.add("nav-hit");
+      }
+    });
+    hitsEl.textContent=count?`命中 ${count} 處`:"查無結果";
+    if(first) first.scrollIntoView({behavior:"smooth",block:"center"});
   }
 
   /* ============ 比賽 ============ */
