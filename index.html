@@ -719,6 +719,9 @@
         const h=(s.heading||"").trim();
         if(h.length>=4 && (first.includes(h)||h.includes(first))) idx=i;
       });
+      // 內容 fallback:對戰計分表(勝利方式/分數)歸到「關於對戰之勝負」主章節
+      if(idx<0 && /極限勝利/.test(str) && /迴轉勝利/.test(str))
+        idx=sections.findIndex(s=>(s.heading||"").trim()==="關於對戰之勝負");
       if(idx>=0) (tableFor[idx]=tableFor[idx]||[]).push(str);
       else leftover.push(str);
     });
@@ -734,6 +737,8 @@
       const body=s.body||[];
       const id="rule-"+i;
       const isGroup=!body.length;
+      // 略過與前面重複、且無內文的空標題(避免冗餘錨點,例:改定內容區的「關於對戰之勝負」)
+      if(isGroup && !tableFor[i] && sections.slice(0,i).some(p=>p.heading===s.heading)) return "";
       navItems.push(`<li class="${isGroup?"lv-group":""}"><a data-target="${id}" onclick="gotoRule('${id}')">${esc(s.heading)}</a></li>`);
       let out;
       if(isGroup){
