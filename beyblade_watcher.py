@@ -484,7 +484,7 @@ def send_notifications(new_items, restocks, price_drops, keywords=()):
     # 補貨最重要（最高優先），逐項推播並附直達連結
     for p in restocks:
         price = f"NT${int(p['price'])}" if p["price"] else ""
-        ntfy_publish(f"🔁 補貨！{p['title']}", f"{price}\n點我直接前往購買",
+        ntfy_publish("🚨 🔄 補貨！", f"{p['title']}\n{price}\n點我直接前往購買",
                      tags=["rotating_light"], priority=5, click=p["url"])
 
     for p in new_items:
