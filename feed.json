@@ -1,13 +1,13 @@
 {
-  "updated_at": "2026-10-28T10:50:26.603319+00:00",
+  "updated_at": "2026-10-28T17:01:40.170215+00:00",
   "source": "Funbox",
   "count": 9,
   "products": [
     {
-      "id": "66047423",
-      "title": "BEYBLADE X 戰鬥陀螺 CX-16 極限衝擊對戰組C",
-      "url": "https://shop.funbox.com.tw/products/bb09728",
-      "price": 1995.0,
+      "id": "71618748",
+      "title": "BEYBLADE X 戰鬥陀螺 CX-00 新世紀福音戰士改造組",
+      "url": "https://shop.funbox.com.tw/products/bb08568",
+      "price": 1395.0,
       "in_stock": true,
       "status": "restock",
       "first_seen": "2026-10-22T10:28:29.702736+00:00"
@@ -67,11 +67,11 @@
       "first_seen": "2026-10-22T10:28:29.702736+00:00"
     },
     {
-      "id": "71618748",
-      "title": "BEYBLADE X 戰鬥陀螺 CX-00 新世紀福音戰士改造組",
-      "url": "https://shop.funbox.com.tw/products/bb08568",
-      "price": 1395.0,
-      "in_stock": false,
+      "id": "66047423",
+      "title": "BEYBLADE X 戰鬥陀螺 CX-16 極限衝擊對戰組C",
+      "url": "https://shop.funbox.com.tw/products/bb09728",
+      "price": 1995.0,
+      "in_stock": true,
       "status": "normal",
       "first_seen": "2026-10-22T10:28:29.702736+00:00"
     },
